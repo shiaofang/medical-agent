@@ -1,7 +1,11 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes.chat import router as chat_router
+
+logging.basicConfig(level=logging.INFO)
 from api.routes.health import router as health_router
 from config.settings import settings
 
