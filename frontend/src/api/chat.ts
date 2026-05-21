@@ -1,17 +1,6 @@
-import axios from 'axios'
-import type { ChatRequest, ChatResponse } from '../types/chat'
+import type { ChatRequest } from '../types/chat'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
-
-const http = axios.create({
-  baseURL: BASE_URL,
-  timeout: 120_000,
-})
-
-export async function sendMessage(payload: ChatRequest): Promise<ChatResponse> {
-  const { data } = await http.post<ChatResponse>('/chat', payload)
-  return data
-}
 
 export async function sendMessageStream(
   payload: ChatRequest,

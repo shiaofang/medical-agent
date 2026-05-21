@@ -11,8 +11,3 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, description="用户当前输入")
     history: list[ChatMessage] = Field(default_factory=list, max_length=20)
-
-
-class ChatResponse(BaseModel):
-    reply: str
-    model: str
