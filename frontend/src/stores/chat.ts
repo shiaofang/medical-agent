@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { sendMessage } from '../api/chat'
+import { sendMessageStream } from '../api/chat'
 import type { ChatMessage } from '../types/chat'
 
 export interface DisplayMessage extends ChatMessage {
@@ -36,19 +36,33 @@ export const useChatStore = defineStore('chat', () => {
 
     const history = messages.value
       .filter((m) => !m.loading && !m.error)
-      .slice(0, -2)
+      .slice(0, -1)
       .map(({ role, content }) => ({ role, content }))
 
     try {
-      const res = await sendMessage({ message: text, history })
-      placeholder.content = res.reply
-      placeholder.loading = false
-      currentModel.value = res.model
+      await sendMessageStream(
+        { message: text, history },
+        (chunk) => {
+          const target = messages.value[messages.value.length - 1]
+          if (target.loading) target.loading = false
+          target.content += chunk
+        },
+        (model) => {
+          currentModel.value = model
+        },
+        (err) => {
+          const target = messages.value[messages.value.length - 1]
+          target.content = `请求失败：${err}`
+          target.loading = false
+          target.error = true
+        },
+      )
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err)
-      placeholder.content = `请求失败：${msg}`
-      placeholder.loading = false
-      placeholder.error = true
+      const target = messages.value[messages.value.length - 1]
+      target.content = `请求失败：${msg}`
+      target.loading = false
+      target.error = true
     } finally {
       isLoading.value = false
     }
