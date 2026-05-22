@@ -12,6 +12,7 @@ from functools import lru_cache
 
 from langchain.agents import create_agent
 from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.tools import BaseTool
 from langchain_ollama import ChatOllama
 from langgraph.graph.state import CompiledStateGraph
 
@@ -41,11 +42,15 @@ def get_model() -> ChatOllama:
     )
 
 
-def build_agent(system_prompt: str, name: str) -> CompiledStateGraph:
+def build_agent(system_prompt: str, name: str, tools: list[BaseTool] | None = None) -> CompiledStateGraph:
     """根据系统提示词构建一个新的 Agent。"""
+
+    if tools is None:
+        tools = ALL_TOOLS
+
     return create_agent(
         model=get_model(),
-        tools=ALL_TOOLS,
+        tools=tools,
         system_prompt=system_prompt,
         name=name,
     )
